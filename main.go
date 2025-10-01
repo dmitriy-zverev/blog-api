@@ -23,8 +23,7 @@ func main() {
 
 	dbQueries, db, err := initDatabase(config.DBUrl)
 	if err != nil {
-		db.Close()
-		log.Fatal("error initializing database:", err)
+		log.Fatal("error initializing database: ", err)
 	}
 	defer db.Close()
 
@@ -50,9 +49,43 @@ func loadEnv() (*models.Config, error) {
 		return nil, errors.New("PORT string is requiered")
 	}
 
-	dbUrl := os.Getenv("DB_URL")
-	if port == "" {
-		return nil, errors.New("DB_URL string is requiered")
+	var dbUrl string
+
+	if build == "dev" {
+		dbUrl = os.Getenv("DB_URL")
+		if dbUrl == "" {
+			return nil, errors.New("DB_URL string is requiered")
+		}
+	} else {
+		dbHost := os.Getenv("DB_HOST")
+		if dbHost == "" {
+			return nil, errors.New("DB_HOST string is requiered")
+		}
+		dbPort := os.Getenv("DB_PORT")
+		if dbPort == "" {
+			return nil, errors.New("DB_PORT string is requiered")
+		}
+		dbUser := os.Getenv("DB_USER")
+		if dbUser == "" {
+			return nil, errors.New("DB_USER string is requiered")
+		}
+		dbPassword := os.Getenv("DB_PASSWORD")
+		if dbPassword == "" {
+			return nil, errors.New("DB_PASSWORD string is requiered")
+		}
+		dbName := os.Getenv("DB_NAME")
+		if dbName == "" {
+			return nil, errors.New("DB_NAME string is requiered")
+		}
+
+		dbUrl = fmt.Sprintf(
+			"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+			dbUser,
+			dbPassword,
+			dbHost,
+			dbPort,
+			dbName,
+		)
 	}
 
 	return &models.Config{

@@ -1,0 +1,1 @@
+go build -o blog-server && ./blog-server
