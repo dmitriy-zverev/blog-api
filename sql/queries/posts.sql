@@ -27,3 +27,9 @@ UPDATE posts
 SET updatedAt = NOW(), title = $1, content = $2, category = $3, tags = $4
 WHERE id = $5
 RETURNING *;
+
+-- name: GetPostsByTerm :many
+SELECT * FROM posts
+WHERE title ILIKE $1
+OR content ILIKE $1
+OR category ILIKE $1;

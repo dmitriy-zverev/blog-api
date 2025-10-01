@@ -120,12 +120,14 @@ func (cfg *ApiConfig) PostsGetOneHandler(w http.ResponseWriter, req *http.Reques
 }
 
 func (cfg *ApiConfig) PostsGetManyHandler(w http.ResponseWriter, req *http.Request) {
-	posts, err := cfg.DB.GetPosts(context.Background())
+	term := "%" + req.URL.Query().Get("term") + "%"
+
+	posts, err := cfg.DB.GetPostsByTerm(context.Background(), term)
 	if err != nil {
 		sendHttpMessage(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	sendHttpMessage(w, posts, http.StatusOK)
-	log.Println("All post retrieved")
+	log.Printf("Retrieved post with term '%s'\n", term[1:len(term)-1])
 }

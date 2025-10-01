@@ -118,6 +118,44 @@ func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
 	return items, nil
 }
 
+const getPostsByTerm = `-- name: GetPostsByTerm :many
+SELECT id, title, content, category, tags, createdat, updatedat FROM posts
+WHERE title ILIKE $1
+OR content ILIKE $1
+OR category ILIKE $1
+`
+
+func (q *Queries) GetPostsByTerm(ctx context.Context, title string) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsByTerm, title)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Content,
+			&i.Category,
+			pq.Array(&i.Tags),
+			&i.Createdat,
+			&i.Updatedat,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updatePost = `-- name: UpdatePost :one
 UPDATE posts 
 SET updatedAt = NOW(), title = $1, content = $2, category = $3, tags = $4
