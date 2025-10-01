@@ -21,3 +21,9 @@ WHERE id = $1;
 -- name: DeletePost :exec
 DELETE FROM posts
 WHERE id = $1;
+
+-- name: UpdatePost :one
+UPDATE posts 
+SET updatedAt = NOW(), title = $1, content = $2, category = $3, tags = $4
+WHERE id = $5
+RETURNING *;

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/dmitriy-zverev/blog-api/internal/db"
+	"github.com/google/uuid"
 )
 
 func (cfg *ApiConfig) BaseHandler(w http.ResponseWriter, req *http.Request) {
@@ -22,7 +23,7 @@ func (cfg *ApiConfig) PostsPostHandler(w http.ResponseWriter, req *http.Request)
 	}
 
 	if !isValidPostParams(params) && !isValidPostTitleLength(params) && !isValidPostContentLength(params) {
-		sendHttpMessage(w, "invalid params, check docs for more info", http.StatusInternalServerError)
+		sendHttpMessage(w, "invalid params, check docs for more info", http.StatusBadRequest)
 		return
 	}
 
@@ -41,4 +42,46 @@ func (cfg *ApiConfig) PostsPostHandler(w http.ResponseWriter, req *http.Request)
 
 	sendHttpMessage(w, post, http.StatusCreated)
 	log.Printf("Post (id: %s) created at %v\n", post.ID, post.Createdat)
+}
+
+func (cfg *ApiConfig) PostsPutHandler(w http.ResponseWriter, req *http.Request) {
+	postId, err := uuid.Parse(req.PathValue("postId"))
+	if err != nil {
+		sendHttpMessage(w, "invalid post id", http.StatusNotFound)
+		return
+	}
+
+	oldPost, err := cfg.DB.GetPost(context.Background(), postId)
+	if err != nil {
+		sendHttpMessage(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	params, err := parseHttpJson[post](req.Body)
+	if err != nil {
+		sendHttpMessage(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isValidPostParams(params) && !isValidPostTitleLength(params) && !isValidPostContentLength(params) {
+		sendHttpMessage(w, "invalid params, check docs for more info", http.StatusBadRequest)
+		return
+	}
+
+	arg := db.UpdatePostParams{
+		Title:    params.Title,
+		Content:  params.Content,
+		Category: params.Category,
+		Tags:     params.Tags,
+		ID:       oldPost.ID,
+	}
+
+	newPost, err := cfg.DB.UpdatePost(context.Background(), arg)
+	if err != nil {
+		sendHttpMessage(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sendHttpMessage(w, newPost, http.StatusOK)
+	log.Printf("Post (id: %s) updated at %v\n", newPost.ID, newPost.Updatedat)
 }

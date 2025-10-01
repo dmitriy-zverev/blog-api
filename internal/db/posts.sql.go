@@ -117,3 +117,39 @@ func (q *Queries) GetPosts(ctx context.Context) ([]Post, error) {
 	}
 	return items, nil
 }
+
+const updatePost = `-- name: UpdatePost :one
+UPDATE posts 
+SET updatedAt = NOW(), title = $1, content = $2, category = $3, tags = $4
+WHERE id = $5
+RETURNING id, title, content, category, tags, createdat, updatedat
+`
+
+type UpdatePostParams struct {
+	Title    string
+	Content  string
+	Category string
+	Tags     []string
+	ID       uuid.UUID
+}
+
+func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, error) {
+	row := q.db.QueryRowContext(ctx, updatePost,
+		arg.Title,
+		arg.Content,
+		arg.Category,
+		pq.Array(arg.Tags),
+		arg.ID,
+	)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Content,
+		&i.Category,
+		pq.Array(&i.Tags),
+		&i.Createdat,
+		&i.Updatedat,
+	)
+	return i, err
+}
