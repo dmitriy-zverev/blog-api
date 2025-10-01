@@ -1,0 +1,23 @@
+-- name: CreatePost :one
+INSERT INTO posts (id, title, content, category, tags, createdAt, updatedAt)
+VALUES (
+    gen_random_uuid(),
+    $1,
+    $2,
+    $3,
+    $4,
+    NOW(),
+    NOW()
+)
+RETURNING *;
+
+-- name: GetPosts :many
+SELECT * FROM posts;
+
+-- name: GetPost :one
+SELECT * FROM posts
+WHERE id = $1;
+
+-- name: DeletePost :exec
+DELETE FROM posts
+WHERE id = $1;
