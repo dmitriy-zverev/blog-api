@@ -68,6 +68,7 @@ func setupRoutes(cfg *handlers.ApiConfig) *http.ServeMux {
 	mux.HandleFunc("GET "+API_VERSION+BASE_ROUTE, cfg.BaseHandler)
 	mux.HandleFunc("POST "+API_VERSION+POSTS_ROUTE, cfg.PostsPostHandler)
 	mux.HandleFunc("PUT "+API_VERSION+POST_ROUTE, cfg.PostsPutHandler)
+	mux.HandleFunc("DELETE "+API_VERSION+POST_ROUTE, cfg.PostsDeleteHandler)
 
 	return mux
 }

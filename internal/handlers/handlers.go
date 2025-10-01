@@ -85,3 +85,19 @@ func (cfg *ApiConfig) PostsPutHandler(w http.ResponseWriter, req *http.Request) 
 	sendHttpMessage(w, newPost, http.StatusOK)
 	log.Printf("Post (id: %s) updated at %v\n", newPost.ID, newPost.Updatedat)
 }
+
+func (cfg *ApiConfig) PostsDeleteHandler(w http.ResponseWriter, req *http.Request) {
+	postId, err := uuid.Parse(req.PathValue("postId"))
+	if err != nil {
+		sendHttpMessage(w, "invalid post id", http.StatusNotFound)
+		return
+	}
+
+	if err := cfg.DB.DeletePost(context.Background(), postId); err != nil {
+		sendHttpMessage(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	sendHttpMessage(w, "", http.StatusNoContent)
+	log.Printf("Post (id: %s) deleted\n", postId)
+}
