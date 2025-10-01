@@ -66,6 +66,7 @@ func setupRoutes(cfg *handlers.ApiConfig) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET "+API_VERSION+BASE_ROUTE, cfg.BaseHandler)
+	mux.HandleFunc("POST "+API_VERSION+POSTS_ROUTE, cfg.PostsPostHandler)
 
 	return mux
 }
@@ -84,8 +85,8 @@ func startServer(mux *http.ServeMux, port string) error {
 		Addr:    ":" + port,
 	}
 
-	fmt.Println("Starting server...")
-	fmt.Printf("Running on http://localhost:%s\n", port)
+	log.Println("Starting server...")
+	log.Printf("Running on http://localhost:%s\n", port)
 
 	return server.ListenAndServe()
 }

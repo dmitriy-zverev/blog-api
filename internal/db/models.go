@@ -5,7 +5,6 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,7 +14,7 @@ type Post struct {
 	ID        uuid.UUID
 	Title     string
 	Content   string
-	Category  sql.NullString
+	Category  string
 	Tags      []string
 	Createdat time.Time
 	Updatedat time.Time

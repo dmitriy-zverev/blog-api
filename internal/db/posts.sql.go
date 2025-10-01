@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -30,7 +29,7 @@ RETURNING id, title, content, category, tags, createdat, updatedat
 type CreatePostParams struct {
 	Title    string
 	Content  string
-	Category sql.NullString
+	Category string
 	Tags     []string
 }
 
